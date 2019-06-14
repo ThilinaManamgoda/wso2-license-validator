@@ -186,18 +186,18 @@ public class LicenseValidatorTest {
         PowerMockito.doReturn(LicenseValidatorTest.class.getClassLoader()
                 .getResourceAsStream("certs/public.pem"))
                 .when(LicenseValidator.class, "getPublicKeyFileStream");
-        Whitebox.invokeMethod(LicenseValidator.class, "verify", carbonHome + "/token/valid");
+        Whitebox.invokeMethod(LicenseValidator.class, "verify", carbonHome + "/tokens/valid");
     }
 
 
     @Test(expected = InvalidLicenseFileException.class)
     public void verify_InvalidLicenseFileExceptionThrown() throws Exception {
-        Whitebox.invokeMethod(LicenseValidator.class, "verify", carbonHome + "/token/invalid");
+        Whitebox.invokeMethod(LicenseValidator.class, "verify", carbonHome + "/tokens/invalid");
     }
 
     @Test(expected = JWTVerificationException.class)
     public void verify_JWTVerificationExceptionExceptionThrown() throws Exception {
-        Whitebox.invokeMethod(LicenseValidator.class, "verify", carbonHome + "/token/expired");
+        Whitebox.invokeMethod(LicenseValidator.class, "verify", carbonHome + "/tokens/expired");
     }
 
     @Test

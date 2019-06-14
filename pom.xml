@@ -90,7 +90,7 @@
                 <version>${maven-enforcer-plugin.verion}</version>
                 <executions>
                     <execution>
-                        <id>enforce-files-exist</id>
+                        <id>enforce-public-cert</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>enforce</goal>
