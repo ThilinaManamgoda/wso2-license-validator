@@ -23,13 +23,14 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import org.wso2.exceptions.InvalidCarbonHomeException;
-import org.wso2.exceptions.InvalidLicenseFileException;
 import org.wso2.exceptions.InvalidLicenseKeyException;
 import org.wso2.exceptions.InvalidProductCodeException;
 import org.wso2.exceptions.InvalidPublicKeyException;
 import org.wso2.exceptions.LicenseKeyExpiredException;
+import org.wso2.exceptions.NotExistingCarbonHomeException;
+import org.wso2.exceptions.NotExistingLicenseKeyFileException;
 import org.wso2.utils.Constants;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +48,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static org.wso2.utils.Constants.ALGORITHM;
 import static org.wso2.utils.Constants.LICENSE_KEY_PATH;
 import static org.wso2.utils.Constants.PRODUCT_CODES_CLAIM;
@@ -60,7 +62,6 @@ import static org.wso2.utils.Constants.WSO2_CARBON_CODE;
 public class LicenseValidator {
 
     private static final Logger logger = Logger.getLogger(LicenseValidator.class.getName());
-    private static String carbonHome;
 
     /**
      * The agent class must implement a public static premain method similar in principle to the main application
@@ -71,10 +72,11 @@ public class LicenseValidator {
      */
     public static void premain(final String agentArgument) {
         try {
-            loadCarbonHome();
+            String carbonHome = loadCarbonHome();
             DecodedJWT decodedJWT = verify(carbonHome + LICENSE_KEY_PATH);
             inspectExpireDate(decodedJWT);
-            validateProductCode(decodedJWT);
+            String productCode = getProductCode(carbonHome + PRODUCT_FILE_PATH);
+            validateProductCode(decodedJWT, productCode);
         } catch (TokenExpiredException e) {
             handleError(new LicenseKeyExpiredException("License key has expired", e));
         } catch (JWTVerificationException e) {
@@ -103,7 +105,7 @@ public class LicenseValidator {
      *
      * @return public key {@link RSAPublicKey}
      * @throws IOException              If cannot read the public certificate
-     * @throws NoSuchAlgorithmException If cannot find the algorithm "RSA"
+     * @throws NoSuchAlgorithmException If cannot find the algorithm {@link Constants#ALGORITHM}
      * @throws InvalidKeySpecException  If cannot create public key
      */
     private static RSAPublicKey getRSAPublicKey() throws IOException, NoSuchAlgorithmException,
@@ -131,25 +133,23 @@ public class LicenseValidator {
      * 1. Token has expired
      * 2. If the issuer doesn't match
      * 3. The signature is invalid
-     * 4. Invalid issuer
-     * This method will read the license key from the file.
      *
-     * "{@link LicenseValidator#carbonHome}/{@link Constants#LICENSE_KEY_PATH}".
+     * This method will read the license key from the file.
      *
      * @param licenseKeyPath Path to the license key file
      * @return Decoded JWT token {@link DecodedJWT}
-     * @throws NoSuchAlgorithmException If cannot find the algorithm "RSA"
+     * @throws NoSuchAlgorithmException If cannot find the algorithm {@link Constants#ALGORITHM}
      * @throws IOException              If cannot read the public certificate
      * @throws InvalidKeySpecException  If cannot create public key
      * @throws JWTVerificationException If the JWT is not valid
      */
     private static DecodedJWT verify(String licenseKeyPath) throws NoSuchAlgorithmException, IOException,
-            InvalidKeySpecException, JWTVerificationException, InvalidLicenseFileException {
+            InvalidKeySpecException, JWTVerificationException, NotExistingLicenseKeyFileException {
         byte[] fileContent;
         try {
             fileContent = Files.readAllBytes(Paths.get(licenseKeyPath));
         } catch (IOException e) {
-            throw new InvalidLicenseFileException(String.format("Unable to read license key file: %s",
+            throw new NotExistingLicenseKeyFileException(String.format("Unable to read license key file: %s",
                     licenseKeyPath), e);
         }
         String jwt = new String(fileContent, StandardCharsets.UTF_8);
@@ -161,33 +161,36 @@ public class LicenseValidator {
     }
 
     /**
-     * Loads the carbon.home property value in to carbonHome.
+     * Loads the carbon.home property value.
      *
-     * @throws InvalidCarbonHomeException If "carbon.home" property is not configured or empty
+     * @return Carbon home
+     * @throws NotExistingCarbonHomeException If "carbon.home" property is not configured
      */
-    private static void loadCarbonHome() throws InvalidCarbonHomeException {
-        carbonHome = System.getProperty(Constants.CARBON_HOME);
+    private static String loadCarbonHome() throws NotExistingCarbonHomeException {
+        String carbonHome = System.getProperty(Constants.CARBON_HOME);
         if (carbonHome == null) {
-            throw new InvalidCarbonHomeException(String.format("Property: %s is not configured",
+            throw new NotExistingCarbonHomeException(String.format("Property: %s is not configured",
                     Constants.CARBON_HOME));
         }
+        return carbonHome;
     }
 
     /**
-     * Reads the product code from "${CARBON_HOME}/updates/product.txt".
+     * Reads the product code from product.txt.
      *
+     * @param productFilePath Path of the product.txt file
      * @return Product code
      * @throws InvalidProductCodeException if unable to read the product.txt
      */
-    private static String getProductCode() throws InvalidProductCodeException {
+    private static String getProductCode(final String productFilePath) throws InvalidProductCodeException {
         String productCode;
         try {
-            String fileContent = new String(Files.readAllBytes(Paths.get(carbonHome + PRODUCT_FILE_PATH))
+            String fileContent = new String(Files.readAllBytes(Paths.get(productFilePath))
                     , StandardCharsets.UTF_8);
             productCode = fileContent.substring(0, fileContent.lastIndexOf("-"));
         } catch (IOException e) {
             throw new InvalidProductCodeException(String.format("Unable to read file %s",
-                    carbonHome + PRODUCT_FILE_PATH), e);
+                    productFilePath), e);
         }
         return productCode;
     }
@@ -206,20 +209,21 @@ public class LicenseValidator {
     }
 
     /**
-     * Validates the Product code claim. The Product code claim is valid if the code in product.txt is with in the
+     * Validates the Product code claim. The Product code claim is valid if the given code is with in the
      * given product code list or equal to "wso2carbon".
      *
      * @param jwt JWT token
-     * @throws InvalidProductCodeException If ${CARBON_HOME} is not set, unable to read the product.txt
-     *                                     or product code doesn't match
+     * @param productCode Product code
+     *
+     * @throws InvalidProductCodeException If product code doesn't match
      */
-    private static void validateProductCode(final DecodedJWT jwt) throws InvalidProductCodeException {
+    private static void validateProductCode(final DecodedJWT jwt, final String productCode) throws
+            InvalidProductCodeException {
         String[] jwtProductCodes = jwt.getClaim(PRODUCT_CODES_CLAIM).asArray(String.class);
         if (jwtProductCodes == null || jwtProductCodes.length == 0) {
-            throw new InvalidProductCodeException(String.format("%s claim is not configured or em[ty",
+            throw new InvalidProductCodeException(String.format("%s claim is not configured or empty",
                     PRODUCT_CODES_CLAIM));
         }
-        String productCode = getProductCode();
         for (String jwtProductCode : jwtProductCodes) {
             if (jwtProductCode.equals(productCode) || jwtProductCode.equals(WSO2_CARBON_CODE)) {
                 return;
@@ -232,7 +236,7 @@ public class LicenseValidator {
      * Check whether the "exp" claim is set or not.
      *
      * @param jwt JWT token
-     * @throws LicenseKeyExpiredException If the "exp" claim is set
+     * @throws LicenseKeyExpiredException If the "exp" claim is not set
      */
     private static void inspectExpireDate(final DecodedJWT jwt) throws LicenseKeyExpiredException {
         if (jwt.getExpiresAt() == null) {

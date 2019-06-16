@@ -26,10 +26,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
-import org.wso2.exceptions.InvalidCarbonHomeException;
-import org.wso2.exceptions.InvalidLicenseFileException;
 import org.wso2.exceptions.InvalidProductCodeException;
 import org.wso2.exceptions.LicenseKeyExpiredException;
+import org.wso2.exceptions.NotExistingCarbonHomeException;
+import org.wso2.exceptions.NotExistingLicenseKeyFileException;
+
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,25 +54,19 @@ public class LicenseValidatorTest {
         System.setProperty("carbon.home", carbonHome);
     }
 
-    private void setCarbonHome() {
-        Whitebox.setInternalState(LicenseValidator.class,
-                "carbonHome", carbonHome);
-    }
-
     private void clearCarbonHome() {
         System.clearProperty("carbon.home");
-        Whitebox.setInternalState(LicenseValidator.class, "carbonHome", "");
     }
 
     @Test
     public void loadCarbonHome_HappyPath() throws Exception {
         setCarbonHomeProperty();
-        Whitebox.invokeMethod(LicenseValidator.class, "loadCarbonHome");
-        assertEquals(carbonHome, Whitebox.getInternalState(LicenseValidator.class, "carbonHome"));
+        String result = Whitebox.invokeMethod(LicenseValidator.class, "loadCarbonHome");
+        assertEquals(carbonHome, result);
         clearCarbonHome();
     }
 
-    @Test(expected = InvalidCarbonHomeException.class)
+    @Test(expected = NotExistingCarbonHomeException.class)
     public void loadCarbonHome_ExceptionThrown() throws Exception {
         clearCarbonHome();
         Whitebox.invokeMethod(LicenseValidator.class, "loadCarbonHome");
@@ -79,15 +74,14 @@ public class LicenseValidatorTest {
 
     @Test
     public void getProductCode_HappyPath() throws Exception {
-        Whitebox.setInternalState(LicenseValidator.class, "carbonHome", carbonHome);
-        String productCode = Whitebox.invokeMethod(LicenseValidator.class, "getProductCode");
+        String productCode = Whitebox.invokeMethod(LicenseValidator.class, "getProductCode",
+                carbonHome + "/updates/product.txt");
         assertEquals("wso2is-km", productCode);
     }
 
     @Test(expected = InvalidProductCodeException.class)
     public void getProductCode_ExceptionThrown() throws Exception {
-        clearCarbonHome();
-        Whitebox.invokeMethod(LicenseValidator.class, "getProductCode");
+        Whitebox.invokeMethod(LicenseValidator.class, "getProductCode", "");
     }
 
     @Test
@@ -118,7 +112,6 @@ public class LicenseValidatorTest {
 
     @Test
     public void validateProductCode_HappyPath() throws Exception {
-        setCarbonHome();
         DecodedJWT jwt = JWT.decode("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ3c28yLmNvbSIsInByb2R1Y3RD" +
                 "b2RlcyI6WyJ3c28yaXMta20iXX0.lc0w8sJmSg4daHb5xGuUykq6nCEBuKmxCCvN0SBU7TC8jetT70VJv4hoGRQH3n7WlPBxOdz" +
                 "nXejLjnTBBHZaxNS-PF7jFkXyxpcJ-l5KdZvdRUr_TJulJ2hV5vmz_p2klXuFIjHz7IDT5ajU5BcBLpF_e8wqPs3jMVAkPXSoQ2" +
@@ -128,13 +121,12 @@ public class LicenseValidatorTest {
                 "BOfpsg6w7KOEJ0FIJxhKvxrz-zYCrXgcTJmsUQlM1mBeGUcpeQlmukQ8_0EbhZVZ0BS3BadnD8ZEgdYKoc5X8eTqqJ8xXd5qcUa" +
                 "MFqWq-luiteOGvj1RIMcJAGtmTExTYjXHGnkpCMGV9n0pZ9hpQbya5vhOPB7y9Mifj6Hj9VxIRP0PjZnGQhB_ZuFNKOeAp3LmSu" +
                 "Om7FMbT-_w1FxDvVHk");
-        Whitebox.invokeMethod(LicenseValidator.class, "validateProductCode", jwt);
-        clearCarbonHome();
+        Whitebox.invokeMethod(LicenseValidator.class, "validateProductCode", jwt,
+                "wso2is-km");
     }
 
     @Test
     public void validateProductCode_WSO2CarbonCode() throws Exception {
-        setCarbonHome();
         DecodedJWT jwt = JWT.decode("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ3c28yLmNvbSIsInByb2R1Y" +
                 "3RDb2RlcyI6WyJ3c28yaXMta20iLCJ3c28yY2FyYm9uIl19.Ra2T1npi5Xli5ZqrfPDA0I2T3AmQpNuVc4c-R29FFI9Smm-a" +
                 "4LvMI4ocXwUhs6FVM9ad5uMRL5VU9i_PuGVKSL_wr6RIExJZvHqOOySgknVFgsEnIMuSFX1C_VuNsMsyF7KLO_T4lakGTNtD" +
@@ -144,13 +136,12 @@ public class LicenseValidatorTest {
                 "xLj0jjkMKKRdHgBvksOv-HGUWq_duSGx-3hnwVmmLAD9FgXOVyED1kcpBg7skBrXBd42yaboq3ANhNhO9BZOm1_Anc7MDrL7" +
                 "X7PzgIpJAr9ca_BqKoAjOpxTocloSsCH-4E_-fxxABcHGYpbhVha7oMz-HjcGD8OeXMNoUzQ0QC3ocn8mXEqv30y3f2rzETC" +
                 "M27srKF9VNR2FryEqoMOu5uZI2EZKjpd6_50LZRWivZZTo1KSU-IUe6099c");
-        Whitebox.invokeMethod(LicenseValidator.class, "validateProductCode", jwt);
-        clearCarbonHome();
+        Whitebox.invokeMethod(LicenseValidator.class, "validateProductCode", jwt,
+                "wso2is-km");
     }
 
     @Test(expected = InvalidProductCodeException.class)
     public void validateProductCode_InvalidProductCodeExceptionThrown() throws Exception {
-        setCarbonHome();
         DecodedJWT jwt = JWT.decode("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ3c28yLmNvbSIsInByb2R1Y" +
                 "3RDb2RlcyI6WyJ3c28yYW0iXX0.dM16Neb_c1Nm45RU8oIFyWrsKcPMKQ1hE2uJ4KU_wQ5IT6P6_CjPefAUm7yfqMsknmUds" +
                 "moih364bNnZ7ao31wfJ9bQ17TpeF8M17mOXTkhRKhk06Ba6o4oogKgdJRe8FPza1txtCgMUQ7Qo0lYJHmyqS3NOrxWDI5ny_w" +
@@ -160,13 +151,12 @@ public class LicenseValidatorTest {
                 "lZRP_Ry72p8V0LdMxxdTYfEoSB_kaEVmmISLIeq94C0356iccZ82AWaA-o6MmVpMwwHbNd8mT88tm67x38L-2JslzrXzpikP3X" +
                 "Rb3M4LULA2Wg7Tt9GTia_UlCa7BGZEgxlSbGaV7Ez59pCS-uQJZrS92q46rq--gpmliLlzEgrg1Wl0zAadn3yKKcxG6izwQ3y5" +
                 "GxgQX5I9y92uukBULRRGhmnMk");
-        Whitebox.invokeMethod(LicenseValidator.class, "validateProductCode", jwt);
-        clearCarbonHome();
+        Whitebox.invokeMethod(LicenseValidator.class, "validateProductCode", jwt,
+                "wso2is-km");
     }
 
     @Test(expected = InvalidProductCodeException.class)
     public void validateProductCode_NullProductCode_InvalidProductCodeExceptionThrown() throws Exception {
-        setCarbonHome();
         DecodedJWT jwt = JWT.decode("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ3c28yLmNvbSJ9.jJHSwz" +
                 "okQWPkLG4h2tSPNOA6fJ5xacYqTeDFAi8Pb68OvUeIwBYGKk12FO83K0XYwncN42J7EdpdAs-78opxOwWoTJ_gKJoyn3AK" +
                 "_orQw0Gq2HRbQCB-86Nd3ulnuLJTH1mvnPOSv3odnl0m6gYPBWX5r2s9KCpkVz0y20EXHMPWQ4lEEkEy9Ee-pxtVzpY00f" +
@@ -176,8 +166,8 @@ public class LicenseValidatorTest {
                 "5J7x8VoiMAt5747IgxfquVeYDwQKkLLG0eNOz5GDAalO4atIVOinXomrbEvn1iIcQ7iGFGJTiw65aCX1uCgP5bMHExhpDPg" +
                 "1BX_j3mQKPowkV1LyvUyFDA-bikd0WJ5szlc3MbejG-GgKWvhPd3FYE9S0h1KSQX5-JAPvAaytgSROyXMc6snCk1Clly52n" +
                 "7nkzo6Dgq1as_Q");
-        Whitebox.invokeMethod(LicenseValidator.class, "validateProductCode", jwt);
-        clearCarbonHome();
+        Whitebox.invokeMethod(LicenseValidator.class, "validateProductCode", jwt,
+                "wso2is-km");
     }
 
     @Test
@@ -190,7 +180,7 @@ public class LicenseValidatorTest {
     }
 
 
-    @Test(expected = InvalidLicenseFileException.class)
+    @Test(expected = NotExistingLicenseKeyFileException.class)
     public void verify_InvalidLicenseFileExceptionThrown() throws Exception {
         Whitebox.invokeMethod(LicenseValidator.class, "verify", carbonHome + "/tokens/invalid");
     }

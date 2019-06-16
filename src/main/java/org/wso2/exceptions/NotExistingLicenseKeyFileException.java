@@ -18,10 +18,10 @@
 package org.wso2.exceptions;
 
 /**
- * Thrown if carbon.home property is not set or empty.
+ * Thrown if it is unable to read license key.
  */
-public class InvalidCarbonHomeException extends Exception {
-    public InvalidCarbonHomeException(String errMsg) {
-        super(errMsg);
+public class NotExistingLicenseKeyFileException extends Exception {
+    public NotExistingLicenseKeyFileException(String errMsg, Throwable e) {
+        super(errMsg, e);
     }
 }
