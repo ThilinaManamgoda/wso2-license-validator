@@ -129,12 +129,11 @@ public class LicenseValidator {
     }
 
     /**
-     * Verify JWT. The token will be invalid if the following condition are true,
+     * This method will read the license key from the given file and verify JWT. The token will be invalid if the
+     * following condition are true,
      * 1. Token has expired
      * 2. If the issuer doesn't match
      * 3. The signature is invalid
-     *
-     * This method will read the license key from the file.
      *
      * @param licenseKeyPath Path to the license key file
      * @return Decoded JWT token {@link DecodedJWT}
@@ -161,7 +160,7 @@ public class LicenseValidator {
     }
 
     /**
-     * Loads the carbon.home property value.
+     * Loads the "carbon.home" property value.
      *
      * @return Carbon home
      * @throws NotExistingCarbonHomeException If "carbon.home" property is not configured
@@ -209,8 +208,8 @@ public class LicenseValidator {
     }
 
     /**
-     * Validates the Product code claim. The Product code claim is valid if the given code is with in the
-     * given product code list or equal to "wso2carbon".
+     * Validates the Product code claim. The Product code claim is valid if the given code or "wso2carbon" is with in
+     * the jwt claim {@link Constants#PRODUCT_CODES_CLAIM}.
      *
      * @param jwt JWT token
      * @param productCode Product code
