@@ -31,9 +31,6 @@ import org.wso2.exceptions.LicenseKeyExpiredException;
 import org.wso2.exceptions.NotExistingCarbonHomeException;
 import org.wso2.exceptions.NotExistingLicenseKeyFileException;
 
-
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 
@@ -91,14 +88,6 @@ public class LicenseValidatorTest {
                 .when(LicenseValidator.class, "getPublicKeyFileStream");
         RSAPublicKey key = Whitebox.invokeMethod(LicenseValidator.class, "getRSAPublicKey");
         assertEquals(ALGORITHM, key.getAlgorithm());
-    }
-
-    @Test(expected = IOException.class)
-    public void getRSAPublicKey_IOExceptionThrown() throws Exception {
-        PowerMockito.spy(LicenseValidator.class);
-        PowerMockito.doReturn(new FileInputStream(""))
-                .when(LicenseValidator.class, "getPublicKeyFileStream");
-        Whitebox.invokeMethod(LicenseValidator.class, "getRSAPublicKey");
     }
 
     @Test(expected = InvalidKeySpecException.class)

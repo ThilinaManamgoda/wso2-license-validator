@@ -83,9 +83,6 @@ public class LicenseValidator {
             handleError(new InvalidLicenseKeyException("Invalid license key", e));
         } catch (InvalidKeySpecException e) {
             handleError(new InvalidPublicKeyException(String.format("Invalid public key: %s", PUBLIC_KEY), e));
-        } catch (IOException e) {
-            String errMsg = String.format("Couldn't load the public key file: %s", PUBLIC_KEY);
-            handleError(new InvalidPublicKeyException(errMsg, e));
         } catch (Throwable e) {
             handleError(e);
         }
@@ -104,12 +101,12 @@ public class LicenseValidator {
      * Load public certificate in .pem format as a {@link RSAPublicKey}.
      *
      * @return public key {@link RSAPublicKey}
-     * @throws IOException              If cannot read the public certificate
-     * @throws NoSuchAlgorithmException If cannot find the algorithm {@link Constants#ALGORITHM}
-     * @throws InvalidKeySpecException  If cannot create public key
+     * @throws InvalidPublicKeyException If cannot read the public certificate
+     * @throws NoSuchAlgorithmException  If cannot find the algorithm {@link Constants#ALGORITHM}
+     * @throws InvalidKeySpecException   If cannot create public key
      */
-    private static RSAPublicKey getRSAPublicKey() throws IOException, NoSuchAlgorithmException,
-            InvalidKeySpecException {
+    private static RSAPublicKey getRSAPublicKey() throws NoSuchAlgorithmException,
+            InvalidKeySpecException, InvalidPublicKeyException {
         StringBuilder sb = new StringBuilder();
         try (InputStream inputStream = getPublicKeyFileStream();
              BufferedReader buf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
@@ -118,6 +115,9 @@ public class LicenseValidator {
                 sb.append(line);
                 line = buf.readLine();
             }
+        } catch (IOException e) {
+            String errMsg = String.format("Couldn't load the public key file: %s", PUBLIC_KEY);
+            throw new InvalidPublicKeyException(errMsg, e);
         }
         String publicKeyContent = sb.toString()
                 .replaceAll("\\n", "")
@@ -137,13 +137,14 @@ public class LicenseValidator {
      *
      * @param licenseKeyPath Path to the license key file
      * @return Decoded JWT token {@link DecodedJWT}
-     * @throws NoSuchAlgorithmException If cannot find the algorithm {@link Constants#ALGORITHM}
-     * @throws IOException              If cannot read the public certificate
-     * @throws InvalidKeySpecException  If cannot create public key
-     * @throws JWTVerificationException If the JWT is not valid
+     * @throws NoSuchAlgorithmException  If cannot find the algorithm {@link Constants#ALGORITHM}
+     * @throws InvalidPublicKeyException If cannot read the public certificate
+     * @throws InvalidKeySpecException   If cannot create public key
+     * @throws JWTVerificationException  If the JWT is not valid
      */
-    private static DecodedJWT verify(String licenseKeyPath) throws NoSuchAlgorithmException, IOException,
-            InvalidKeySpecException, JWTVerificationException, NotExistingLicenseKeyFileException {
+    private static DecodedJWT verify(String licenseKeyPath) throws NoSuchAlgorithmException,
+            InvalidKeySpecException, JWTVerificationException, NotExistingLicenseKeyFileException,
+            InvalidPublicKeyException {
         byte[] fileContent;
         try {
             fileContent = Files.readAllBytes(Paths.get(licenseKeyPath));
@@ -211,9 +212,8 @@ public class LicenseValidator {
      * Validates the Product code claim. The Product code claim is valid if the given code or "wso2carbon" is with in
      * the jwt claim {@link Constants#PRODUCT_CODES_CLAIM}.
      *
-     * @param jwt JWT token
+     * @param jwt         JWT token
      * @param productCode Product code
-     *
      * @throws InvalidProductCodeException If product code doesn't match
      */
     private static void validateProductCode(final DecodedJWT jwt, final String productCode) throws
