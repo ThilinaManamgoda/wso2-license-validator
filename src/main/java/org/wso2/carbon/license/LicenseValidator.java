@@ -157,7 +157,6 @@ public class LicenseValidator {
             throw new DecodeLicenseKeyException(String.format("Unable to read license key file: %s",
                     licenseKeyPath), e);
         }
-
         String jwtString = new String(fileContent, StandardCharsets.UTF_8);
         DecodedJWT decodedJWT = JWT.decode(jwtString);
         if (decodedJWT.getIssuer() == null) {
