@@ -168,6 +168,9 @@ public class LicenseValidator {
      * 3. The Product code claim is valid if the given code or "wso2carbon" is with in
      * the jwt claim {@link Constants#PRODUCT_CODES_CLAIM}.
      *
+     * Assumption: Decoded JWT has {@link Constants#PRODUCT_CODES_CLAIM} & "exp" claims
+     *
+     *
      * @param decodedJWT Decode JWT
      * @throws PublicKeyException        If cannot construct the public certificate
      * @throws VerifyLicenseKeyException If the token is invalid

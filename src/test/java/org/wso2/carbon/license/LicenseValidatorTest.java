@@ -38,6 +38,7 @@ import java.security.interfaces.RSAPublicKey;
 
 import static org.junit.Assert.assertEquals;
 import static org.wso2.carbon.license.utils.Constants.ALGORITHM_RSA;
+import static org.wso2.carbon.license.utils.Constants.PRODUCT_CODES_CLAIM;
 
 /**
  * Units test for LicenseValidator class methods.
@@ -210,6 +211,19 @@ public class LicenseValidatorTest {
     public void decodeLicenseKey_NoIssuer_dDecodeLicenseKeyExceptionThrown() throws Exception {
         thrown.expect(DecodeLicenseKeyException.class);
         thrown.expectMessage("Issuer claim is not defined");
-        Whitebox.invokeMethod(LicenseValidator.class, "decodeLicenseKey", carbonHome + "/tokens/issuer");
+        Whitebox.invokeMethod(LicenseValidator.class, "decodeLicenseKey", carbonHome + "/tokens/no-issuer");
+    }
+
+    @Test
+    public void decodeLicenseKey_NoProductCodeClaim_dDecodeLicenseKeyExceptionThrown() throws Exception {
+        thrown.expect(DecodeLicenseKeyException.class);
+        thrown.expectMessage(String.format("%s claim is not configured or empty",
+                PRODUCT_CODES_CLAIM));
+        Whitebox.invokeMethod(LicenseValidator.class, "decodeLicenseKey", carbonHome + "/tokens/no-product-code-claim");
+    }
+
+    @Test
+    public void decodeLicenseKey_HappyPath() throws Exception {
+        Whitebox.invokeMethod(LicenseValidator.class, "decodeLicenseKey", carbonHome + "/tokens/valid");
     }
 }
