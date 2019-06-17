@@ -15,13 +15,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.exceptions;
+package org.wso2.carbon.license.exceptions;
 
 /**
- * Thrown when if the Public key is invalid.
+ * Thrown if the product code is invalid.
  */
-public class InvalidPublicKeyException extends Exception {
-    public InvalidPublicKeyException(String errMsg, Throwable e) {
+public class ProductCodeException extends Exception {
+
+    public ProductCodeException(String errMsg) {
+        super(errMsg);
+    }
+
+    public ProductCodeException(String errMsg, Throwable e) {
         super(errMsg, e);
     }
 }

@@ -21,16 +21,22 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.wso2</groupId>
+    <parent>
+        <groupId>org.wso2</groupId>
+        <artifactId>wso2</artifactId>
+        <version>5</version>
+    </parent>
+
+    <groupId>org.wso2.carbon.license</groupId>
     <artifactId>license-validator</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin}</version>
+                <version>${maven.compiler.plugin.version}</version>
                 <configuration>
                     <source>${compile.version}</source>
                     <target>${compile.version}</target>
@@ -40,7 +46,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
+                <version>${maven.assembly.plugin.version}</version>
                 <configuration>
                     <!-- get all project dependencies -->
                     <descriptorRefs>
@@ -48,7 +54,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>org.wso2.LicenseValidator</Premain-Class>
+                            <Premain-Class>org.wso2.carbon.license.LicenseValidator</Premain-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -66,7 +72,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
+                <version>${maven.surefire.plugin.version}</version>
                 <configuration>
                     <systemPropertyVariables>
                         <parent.directory>${project.basedir}</parent.directory>
@@ -76,35 +82,8 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven.checkstyleplugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <configuration>
-                            <configLocation>
-                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
-                            </configLocation>
-                            <suppressionsLocation>
-                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml
-                            </suppressionsLocation>
-                            <encoding>UTF-8</encoding>
-                            <consoleOutput>true</consoleOutput>
-                            <failsOnError>true</failsOnError>
-                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        </configuration>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>${maven-enforcer-plugin.verion}</version>
+                <version>${maven.enforcer.plugin.verion}</version>
                 <executions>
                     <execution>
                         <id>enforce-public-cert</id>
@@ -116,7 +95,7 @@
                             <rules>
                                 <requireFilesExist>
                                     <files>
-                                        <file>${project.build.sourceDirectory}/../resources/certs/public.pem</file>
+                                        <file>${project.build.sourceDirectory}/../resources/certs/public_key.der</file>
                                     </files>
                                 </requireFilesExist>
                             </rules>
@@ -158,17 +137,17 @@
     </dependencies>
 
     <properties>
-        <maven-enforcer-plugin.verion>1.4.1</maven-enforcer-plugin.verion>
+        <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
+        <maven.enforcer.plugin.verion>1.4.1</maven.enforcer.plugin.verion>
         <maven.findbugsplugin.version>3.0.3</maven.findbugsplugin.version>
-        <maven.checkstyleplugin.version>2.17</maven.checkstyleplugin.version>
-        <junit.version>4.4</junit.version>
+        <junit.version>4.12</junit.version>
         <powermock.version>2.0.2</powermock.version>
         <com.auth0.version>3.8.1</com.auth0.version>
         <log4j.version>1.2.17</log4j.version>
-        <maven-assembly-plugin.version>2.4.1</maven-assembly-plugin.version>
-        <maven-compiler-plugin>2.3.2</maven-compiler-plugin>
+        <maven.assembly.plugin.version>2.4.1</maven.assembly.plugin.version>
+        <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
         <compile.version>1.8</compile.version>
-        <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
+        <maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
     </properties>
 
 </project>

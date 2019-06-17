@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,13 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.exceptions;
+package org.wso2.carbon.license.exceptions;
+
 
 /**
- * Thrown if the license key is invalid.
+ * Thrown if JWT verification fails.
+ *
+ * @since 1.0.0
  */
-public class InvalidLicenseKeyException extends Exception {
-    public InvalidLicenseKeyException(String errMsg, Throwable e) {
+public class VerifyLicenseKeyException extends Exception {
+    public VerifyLicenseKeyException(String errMsg, Throwable e) {
         super(errMsg, e);
+    }
+
+    public VerifyLicenseKeyException(String errMsg) {
+        super(errMsg);
     }
 }

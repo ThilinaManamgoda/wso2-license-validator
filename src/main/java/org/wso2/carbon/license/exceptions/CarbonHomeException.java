@@ -15,17 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.exceptions;
+package org.wso2.carbon.license.exceptions;
 
 /**
- * Thrown when the license key has expired or not configured.
+ * Thrown if carbon.home property is not set.
  */
-public class LicenseKeyExpiredException extends Exception {
-    public LicenseKeyExpiredException(String errMsg, Throwable e) {
-        super(errMsg, e);
-    }
-
-    public LicenseKeyExpiredException(String errMsg) {
+public class CarbonHomeException extends Exception {
+    public CarbonHomeException(String errMsg) {
         super(errMsg);
     }
 }

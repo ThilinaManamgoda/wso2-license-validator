@@ -15,13 +15,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.exceptions;
+package org.wso2.carbon.license.utils;
 
 /**
- * Thrown if it is unable to read license key.
+ * This class contains required constants.
+ *
+ * @since 1.0.0
  */
-public class NotExistingLicenseKeyFileException extends Exception {
-    public NotExistingLicenseKeyFileException(String errMsg, Throwable e) {
-        super(errMsg, e);
-    }
+public final class Constants {
+    public static final String PUBLIC_KEY = "certs/public_key.der";
+    public static final String ALGORITHM_RSA = "RSA";
+    public static final String ISSUER = "wso2.com";
+    public static final int EXIT_CODE = 1;
+    public static final String CARBON_HOME = "carbon.home";
+    public static final String PRODUCT_FILE_PATH = "/updates/product.txt";
+    public static final String WSO2_CARBON_CODE = "wso2carbon";
+    public static final String PRODUCT_CODES_CLAIM = "productCodes";
+    public static final String LICENSE_KEY_PATH = "/license.key";
 }

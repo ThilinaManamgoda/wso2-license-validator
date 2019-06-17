@@ -15,13 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.exceptions;
+package org.wso2.carbon.license.exceptions;
 
 /**
- * Thrown if carbon.home property is not set.
+ * Thrown if the Public key is invalid.
  */
-public class NotExistingCarbonHomeException extends Exception {
-    public NotExistingCarbonHomeException(String errMsg) {
-        super(errMsg);
+public class PublicKeyException extends Exception {
+    public PublicKeyException(String errMsg, Throwable e) {
+        super(errMsg, e);
     }
 }

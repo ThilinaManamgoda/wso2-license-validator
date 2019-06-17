@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -15,18 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.exceptions;
+package org.wso2.carbon.license.exceptions;
 
 /**
- * Thrown if the product code is invalid.
+ * Thrown if unable to decode the JWT.
+ *
+ * @since 1.0.0
  */
-public class InvalidProductCodeException extends Exception {
-
-    public InvalidProductCodeException(String errMsg) {
-        super(errMsg);
+public class DecodeLicenseKeyException extends Exception {
+    public DecodeLicenseKeyException(String errMsg, Throwable e) {
+        super(errMsg, e);
     }
 
-    public InvalidProductCodeException(String errMsg, Throwable e) {
-        super(errMsg, e);
+    public DecodeLicenseKeyException(String errMsg) {
+        super(errMsg);
     }
 }
