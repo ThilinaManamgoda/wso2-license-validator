@@ -18,7 +18,7 @@
 package org.wso2.carbon.license.exceptions;
 
 /**
- * Thrown if the product code is invalid.
+ * Thrown if unable to read the given file or get product code.
  *
  * @since 1.0.0
  */

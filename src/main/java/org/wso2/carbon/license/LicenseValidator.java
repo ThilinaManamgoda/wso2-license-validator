@@ -20,6 +20,7 @@ package org.wso2.carbon.license;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -55,6 +56,13 @@ import static org.wso2.carbon.license.utils.Constants.WSO2_CARBON_CODE;
 
 /**
  * This class validates the license key.
+ * <p>
+ * This class holds the "premain" method of the Java agent. This method reads the license
+ * key file located at {Carbon Home}/{@link Constants#LICENSE_KEY_PATH} and validate against,
+ * 1. Issuer
+ * 2. Expire date
+ * 3. {@link Constants#PRODUCT_CODES_CLAIM}
+ * 4. Signature
  *
  * @since 1.0.0
  */
@@ -63,8 +71,13 @@ public class LicenseValidator {
     private static final Logger logger = Logger.getLogger(LicenseValidator.class.getName());
 
     /**
-     * After the Java Virtual Machine (JVM) has initialized,  premain method will be called. In this method the license
-     * key will be verified.
+     * After the Java Virtual Machine (JVM) has initialized,  premain method will be called. This method will load
+     * the license key and validate followings,
+     * <p>
+     * 1. Issuer
+     * 2. Expire date
+     * 3. {@link Constants#PRODUCT_CODES_CLAIM}
+     * 4. Signature
      *
      * @param agentArgument Argument passed for the Java agent
      */
@@ -126,10 +139,10 @@ public class LicenseValidator {
     }
 
     /**
-     * This method will read the license key from the given file and construct a JWT if the following claims are
+     * This method reads the license key from the given file and construct a JWT if the following claims are
      * present,
      * 1. Issuer
-     * 2. Date
+     * 2. Expire date
      * 3. {@link Constants#PRODUCT_CODES_CLAIM}
      *
      * @param licenseKeyPath Path to the license key file
@@ -162,18 +175,20 @@ public class LicenseValidator {
     }
 
     /**
-     * Verifies the JWT for following conditions.
+     * Verifies following JWT claims.
+     * <p>
      * 1. Signature
      * 2. Expire date
-     * 3. The Product code claim is valid if the given code or "wso2carbon" is with in
+     * 3. The Product code claim is valid if the product code or "wso2carbon" is with in
      * the jwt claim {@link Constants#PRODUCT_CODES_CLAIM}.
-     *
+     * 4. Issuer
+     * <p>
      * Assumption: Decoded JWT has {@link Constants#PRODUCT_CODES_CLAIM} & "exp" claims
-     *
      *
      * @param decodedJWT Decode JWT
      * @throws PublicKeyException        If cannot construct the public certificate
      * @throws VerifyLicenseKeyException If the token is invalid
+     * @throws ProductCodeException      if unable to read the given file or get product code
      */
     private static void verifyLicenseKey(final DecodedJWT decodedJWT, final String carbonHome)
             throws PublicKeyException, VerifyLicenseKeyException, ProductCodeException {
@@ -187,6 +202,8 @@ public class LicenseValidator {
             verifier.verify(decodedJWT);
         } catch (TokenExpiredException e) {
             throw new VerifyLicenseKeyException("License key has expired", e);
+        } catch (InvalidClaimException e) {
+            throw new VerifyLicenseKeyException("Claim is invalid", e);
         } catch (JWTVerificationException e) {
             throw new VerifyLicenseKeyException("Signature is invalid", e);
         }
@@ -222,7 +239,7 @@ public class LicenseValidator {
      *
      * @param productFilePath Path of the product code file
      * @return Product code
-     * @throws ProductCodeException if unable to read the given file
+     * @throws ProductCodeException if unable to read the given file or get product code
      */
     private static String getProductCode(final String productFilePath) throws ProductCodeException {
         String fileContent;

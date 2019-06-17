@@ -42,6 +42,8 @@ import static org.wso2.carbon.license.utils.Constants.PRODUCT_CODES_CLAIM;
 
 /**
  * Units test for LicenseValidator class methods.
+ *
+ * @since 1.0.0
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(LicenseValidator.class)
@@ -121,6 +123,23 @@ public class LicenseValidatorTest {
                 "8ML3FEet4bOn_M52Ju24tPuzWBatJE-avd7RC_W-xvwZsgg4CnIXpU2js4_qUlTOMA3tuClsTsaLrvOsOtSxkirrQKyF_PfIEh" +
                 "NnfsxLiexIqdr2pDlxecdBHCAH-0zAbghGI9PczMVzxTCri_VmWGKAfOCgQQiOE-Z9RTa-NNSvteSTb9PH_Lmm5ARApTCCU52F" +
                 "Yp_hof1WRjdz4iTt5hJfs3u4v_uQ4Pre3l0CeSIfL0LlAqAgfPGM4W68");
+        Whitebox.invokeMethod(LicenseValidator.class, "verifyLicenseKey",
+                decodedJWT, carbonHome);
+    }
+
+    @Test
+    public void verifyLicenseKey_InvalidIssuer_VerifyLicenseKeyExceptionThrown() throws Exception {
+        thrown.expect(VerifyLicenseKeyException.class);
+        thrown.expectMessage("Claim is invalid");
+        DecodedJWT decodedJWT = JWT.decode("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ3c28yLmNvbTEiLCJw" +
+                "cm9kdWN0Q29kZXMiOlsid3NvMmNhcmJvbiJdfQ.YVSc8MJeErIUBdsjIGWn1bNidHS55EGKuxKveEdoXWHypBOfI2f8nFMU2DG" +
+                "4UEmT2DZtM_ceLyWd5yIDLmE6igGP0J_teb0IQJbXjqRQDq9mrRhREMAUiV8wJGb7mWDBd_4TD4F0HuSbvfrWUZ368031DFU26" +
+                "1MQ4eDjtFuYvvvIYknRT7IJd8jYP_L32QLL28kXcN3h5oSJgq09s4-WxumCwVjP1p_TYAd4-z51EXuzb9_w-JUqbSFxFHTv5yH" +
+                "OiN8pMaOis1pYxgHu3B2e5rws8OYmpM65zGexBYvBO-MtqMJ_aKmjMY0IAMMmGKljNjP-_4pJVgjZ4fSGH187DE28hnPicB7LP" +
+                "mRqjy5DzwzfVIrVL1rLhWBp8HfSote0vux7n9qGeqDLlSL_IXEtUlKNmmembBFOebbd9cgAO-Q4eskE_XyDxix3D18FKt3MyC1" +
+                "VxGo5Gv6KBnurjkcsW_90jVmyx_bOeAvnJVW18IZzcC6ci_p7oioM0TCkPLJLO4RLXFgn84mtJ1TC6pjiOCvfnlGN65cGH3yyT" +
+                "ldPQNVq1YRoLEa1J2KWQ4qeHHxs_e_Su0I3rXafoAl_ea4DPTxkotjOyUhqNBWnNDlxLiv4SlP_6rvS0Ma2crE1JTeuKbjiF2p" +
+                "cLr095FkwuHSjbJtF31ZxUSHNZgH_5x9dgc0");
         Whitebox.invokeMethod(LicenseValidator.class, "verifyLicenseKey",
                 decodedJWT, carbonHome);
     }
