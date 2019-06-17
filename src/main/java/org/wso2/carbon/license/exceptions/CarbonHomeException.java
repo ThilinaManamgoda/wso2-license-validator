@@ -19,6 +19,8 @@ package org.wso2.carbon.license.exceptions;
 
 /**
  * Thrown if carbon.home property is not set.
+ *
+ * @since 1.0.0
  */
 public class CarbonHomeException extends Exception {
     public CarbonHomeException(String errMsg) {

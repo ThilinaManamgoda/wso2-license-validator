@@ -19,6 +19,8 @@ package org.wso2.carbon.license.exceptions;
 
 /**
  * Thrown if the product code is invalid.
+ *
+ * @since 1.0.0
  */
 public class ProductCodeException extends Exception {
 
