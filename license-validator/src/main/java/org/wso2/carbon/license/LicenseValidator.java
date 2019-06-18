@@ -42,10 +42,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import static org.wso2.carbon.license.utils.Constants.ALGORITHM_RSA;
 import static org.wso2.carbon.license.utils.Constants.LICENSE_KEY_PATH;
@@ -81,13 +81,14 @@ public class LicenseValidator {
      *
      * @param agentArgument Argument passed for the Java agent
      */
-    public static void premain(final String agentArgument) {
+    public static void premain(@SuppressWarnings("unused") final String agentArgument) {
+        String carbonHome = null;
         try {
-            String carbonHome = loadCarbonHome();
+            carbonHome = loadCarbonHome();
             DecodedJWT decodedJWT = decodeLicenseKey(Paths.get(carbonHome, LICENSE_KEY_PATH).toString());
             verifyLicenseKey(decodedJWT, carbonHome);
         } catch (Throwable e) {
-            handleError(e);
+            handleError(e, carbonHome);
         }
     }
 
@@ -202,7 +203,7 @@ public class LicenseValidator {
         } catch (TokenExpiredException e) {
             throw new VerifyLicenseKeyException("License key has expired", e);
         } catch (InvalidClaimException e) {
-            throw new VerifyLicenseKeyException("Claim is invalid", e);
+            throw new VerifyLicenseKeyException("Issuer is invalid", e);
         } catch (JWTVerificationException e) {
             throw new VerifyLicenseKeyException("Signature is invalid", e);
         }
@@ -259,14 +260,27 @@ public class LicenseValidator {
     /**
      * Log the error and exit with exit code 1.
      *
-     * @param err Throwable error
+     * @param err        Throwable error
+     * @param carbonHome Carbon Home
      */
-    private static void handleError(Throwable err) {
-        Handler handlerObj = new ConsoleHandler();
-        handlerObj.setLevel(Level.SEVERE);
-        logger.addHandler(handlerObj);
+    private static void handleError(Throwable err, String carbonHome) {
+        String runtimeHome = System.getProperty(Constants.RUNTIME_HOME);
+        String logFilePath;
+        if (runtimeHome != null) {
+            logFilePath = Paths.get(runtimeHome, "/logs/validator.log").toString();
+        } else {
+            logFilePath = Paths.get(carbonHome, "repository/logs/validator.log").toString();
+        }
+        try {
+            FileHandler fileHandler = new FileHandler(logFilePath);
+            fileHandler.setLevel(Level.SEVERE);
+            fileHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(fileHandler);
+        } catch (IOException e) {
+            System.err.println(e);
+            System.exit(Constants.EXIT_CODE_2);
+        }
         logger.log(Level.SEVERE, err.getMessage(), err);
-        System.exit(Constants.EXIT_CODE);
+        System.exit(Constants.EXIT_CODE_1);
     }
-
 }

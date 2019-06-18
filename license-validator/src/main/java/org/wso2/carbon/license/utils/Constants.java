@@ -26,8 +26,10 @@ public final class Constants {
     public static final String PUBLIC_KEY = "certs/public_key.der";
     public static final String ALGORITHM_RSA = "RSA";
     public static final String ISSUER = "wso2.com";
-    public static final int EXIT_CODE = 1;
+    public static final int EXIT_CODE_1 = 1;
+    public static final int EXIT_CODE_2 = 2;
     public static final String CARBON_HOME = "carbon.home";
+    public static final String RUNTIME_HOME = "wso2.runtime.path";
     public static final String PRODUCT_FILE_PATH = "/updates/product.txt";
     public static final String WSO2_CARBON_CODE = "wso2carbon";
     public static final String PRODUCT_CODES_CLAIM = "productCodes";

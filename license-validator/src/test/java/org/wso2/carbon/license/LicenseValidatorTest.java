@@ -97,6 +97,7 @@ public class LicenseValidatorTest {
         Whitebox.invokeMethod(LicenseValidator.class, "getProductCode",
                 Paths.get(carbonHome, "/updates/product-incorrect.txt").toString());
     }
+
     @Test
     public void verifyLicenseKey_InvalidSignature_VerifyLicenseKeyExceptionThrown() throws Exception {
         thrown.expect(VerifyLicenseKeyException.class);
@@ -130,7 +131,7 @@ public class LicenseValidatorTest {
     @Test
     public void verifyLicenseKey_InvalidIssuer_VerifyLicenseKeyExceptionThrown() throws Exception {
         thrown.expect(VerifyLicenseKeyException.class);
-        thrown.expectMessage("Claim is invalid");
+        thrown.expectMessage("Issuer is invalid");
         DecodedJWT decodedJWT = JWT.decode("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ3c28yLmNvbTEiLCJw" +
                 "cm9kdWN0Q29kZXMiOlsid3NvMmNhcmJvbiJdfQ.YVSc8MJeErIUBdsjIGWn1bNidHS55EGKuxKveEdoXWHypBOfI2f8nFMU2DG" +
                 "4UEmT2DZtM_ceLyWd5yIDLmE6igGP0J_teb0IQJbXjqRQDq9mrRhREMAUiV8wJGb7mWDBd_4TD4F0HuSbvfrWUZ368031DFU26" +
