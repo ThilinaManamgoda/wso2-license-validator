@@ -269,7 +269,7 @@ public class LicenseValidator {
         if (runtimeHome != null) {
             logFilePath = Paths.get(runtimeHome, "/logs/validator.log").toString();
         } else {
-            logFilePath = Paths.get(carbonHome, "repository/logs/validator.log").toString();
+            logFilePath = Paths.get(carbonHome, "/repository/logs/validator.log").toString();
         }
         try {
             FileHandler fileHandler = new FileHandler(logFilePath);
